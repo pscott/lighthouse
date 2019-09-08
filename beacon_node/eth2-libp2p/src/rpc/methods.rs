@@ -1,4 +1,4 @@
-//!Available RPC methods types and ids.
+//! Available RPC methods types and ids.
 
 use ssz::{impl_decode_via_from, impl_encode_via_from};
 use ssz_derive::{Decode, Encode};
@@ -71,7 +71,7 @@ impl_decode_via_from!(GoodbyeReason, u64);
 
 /// Request a number of beacon block roots from a peer.
 #[derive(Encode, Decode, Clone, Debug, PartialEq)]
-pub struct BeaconBlocksRequest {
+pub struct BlocksByRangeRequest {
     /// The hash tree root of a block on the requested chain.
     pub head_block_root: Hash256,
 
@@ -90,8 +90,8 @@ pub struct BeaconBlocksRequest {
 }
 
 /// Request a number of beacon block bodies from a peer.
-#[derive(Encode, Decode, Clone, Debug, PartialEq)]
-pub struct RecentBeaconBlocksRequest {
+#[derive(Clone, Debug, PartialEq)]
+pub struct BlocksByRootRequest {
     /// The list of beacon block bodies being requested.
     pub block_roots: Vec<Hash256>,
 }
@@ -103,10 +103,10 @@ pub struct RecentBeaconBlocksRequest {
 pub enum RPCResponse {
     /// A HELLO message.
     Hello(HelloMessage),
-    /// A response to a get BEACON_BLOCKS request.
-    BeaconBlocks(Vec<u8>),
-    /// A response to a get RECENT_BEACON_BLOCKS request.
-    RecentBeaconBlocks(Vec<u8>),
+    /// A response to a get BLOCKS_BY_RANGE request.
+    BlocksByRange(Vec<u8>),
+    /// A response to a get BLOCKS_BY_ROOT request.
+    BlocksByRoot(Vec<u8>),
 }
 
 #[derive(Debug)]
@@ -168,10 +168,8 @@ impl std::fmt::Display for RPCResponse {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             RPCResponse::Hello(hello) => write!(f, "{}", hello),
-            RPCResponse::BeaconBlocks(data) => write!(f, "<BeaconBlocks>, len: {}", data.len()),
-            RPCResponse::RecentBeaconBlocks(data) => {
-                write!(f, "<RecentBeaconBlocks>, len: {}", data.len())
-            }
+            RPCResponse::BlocksByRange(data) => write!(f, "<BlocksByRange>, len: {}", data.len()),
+            RPCResponse::BlocksByRoot(data) => write!(f, "<BlocksByRoot>, len: {}", data.len()),
         }
     }
 }
@@ -198,7 +196,7 @@ impl std::fmt::Display for GoodbyeReason {
     }
 }
 
-impl std::fmt::Display for BeaconBlocksRequest {
+impl std::fmt::Display for BlocksByRangeRequest {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
