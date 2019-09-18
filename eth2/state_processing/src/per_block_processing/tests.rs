@@ -127,6 +127,26 @@ fn invalid_randao_reveal_signature() {
     assert_eq!(result, Err(BlockProcessingError::RandaoSignatureInvalid));
 }
 
+#[test]
+fn valid_deposit() {
+    let spec = MainnetEthSpec::default_spec();
+    let builder = get_builder(&spec);
+
+    // Calling build but this will change to a specific build_with_deposit method
+    let (block, mut state) = builder.build(None, None, &spec);
+
+    let result = per_block_processing(
+        &mut state,
+        &block,
+        None,
+        BlockSignatureStrategy::VerifyIndividual,
+        &spec,
+    );
+
+    // should be ok because deposit was processed
+    assert_eq!(result, Ok(()));
+}
+
 fn get_builder(spec: &ChainSpec) -> (BlockProcessingBuilder<MainnetEthSpec>) {
     let mut builder = BlockProcessingBuilder::new(VALIDATOR_COUNT, &spec);
 

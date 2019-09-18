@@ -36,8 +36,10 @@ impl<T: EthSpec> BlockProcessingBuilder<T> {
         previous_block_root: Option<Hash256>,
         spec: &ChainSpec,
     ) -> (BeaconBlock<T>, BeaconState<T>) {
-        let (state, keypairs) = self.state_builder.build();
+        let (mut state, keypairs) = self.state_builder.build();
         let builder = &mut self.block_builder;
+        // Adding 1 to deposit_count because we wish to process a deposit
+        state.eth1_data.deposit_count += 1;
 
         builder.set_slot(state.slot);
 
@@ -58,6 +60,13 @@ impl<T: EthSpec> BlockProcessingBuilder<T> {
             None => builder.set_randao_reveal(&keypair.sk, &state.fork, spec),
         }
 
+        // Inserting a valid deposit
+        self.block_builder.insert_deposit(
+            32_000_000_000,
+            1,
+            &state,
+            spec,
+        );
         let block = self.block_builder.build(&keypair.sk, &state.fork, spec);
 
         (block, state)
