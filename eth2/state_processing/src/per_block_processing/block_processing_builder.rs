@@ -39,6 +39,7 @@ impl<T: EthSpec> BlockProcessingBuilder<T> {
         let (mut state, keypairs) = self.state_builder.build();
         let builder = &mut self.block_builder;
         // Adding 1 to deposit_count because we wish to process a deposit
+        // Probably doing this wrong ? Updating deposit_count without updating other values sounds strange...
         state.eth1_data.deposit_count += 1;
 
         builder.set_slot(state.slot);
