@@ -11,3 +11,11 @@ tempfile = "3.1.0"
 types = { path = "../../eth2/types" }
 tree_hash = { path = "../../eth2/utils/tree_hash" }
 rusqlite = "0.20.0"
+
+[dev-dependencies]
+rand = "0.7.2"
+criterion = "0.3.0"
+
+[[bench]]
+name = "sqlite_benchmark"
+harness = false
