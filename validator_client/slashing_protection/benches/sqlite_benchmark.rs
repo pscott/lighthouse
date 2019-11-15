@@ -36,7 +36,7 @@ use rand::Rng;
         }
     }
 
-pub fn criterion_benchmark(c: &mut Criterion) {
+pub fn empty_db_benchmark(c: &mut Criterion) {
     let attestation_file = NamedTempFile::new().expect("couldn't create temporary file");
     let filename = attestation_file.path();
 
@@ -51,5 +51,24 @@ pub fn criterion_benchmark(c: &mut Criterion) {
     }));
 }
 
-criterion_group!(benches, criterion_benchmark);
+pub fn big_db_benchmark(c: &mut Criterion) {
+    let attestation_file = NamedTempFile::new().expect("couldn't create temporary file");
+    let filename = attestation_file.path();
+
+    let mut attestation_history: HistoryInfo<SignedAttestation> =
+        HistoryInfo::empty(filename).expect("IO error with file");
+    for i in 0..20_000 {
+        let attest = attestation_data_builder(i, i + 1);
+        let _ = attestation_history.update_if_valid(&attest);
+    }
+
+    let mut i = 20_002;
+    c.bench_function("history rnd", |b| b.iter(|| {
+        let attest = attestation_data_builder(i, i + 1);
+        let _ = attestation_history.update_if_valid(black_box(&attest));
+        i += 1;
+    }));
+}
+
+criterion_group!(benches, empty_db_benchmark, big_db_benchmark);
 criterion_main!(benches);
